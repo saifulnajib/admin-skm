@@ -107,6 +107,7 @@ class SurveyResource extends Resource
             ->columns([
                 TextColumn::make('index')->label('#')->rowIndex(),
                 TextColumn::make('name')->label('Survey')->searchable()->sortable(),
+                TextColumn::make('nilai')->label('IKM')->sortable(),
                // TextColumn::make('getOpd.name')->label('OPD')->searchable()->sortable(),
                 TextColumn::make('is_active')->label('Status')->searchable()->sortable()->badge()
                 ->color(fn (string $state): string => match ($state) {
