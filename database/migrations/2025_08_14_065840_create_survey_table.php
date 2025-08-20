@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->boolean('is_active')->default(1);
-            $table->float('nilai', 6, 4);
+            $table->float('nilai', 6, 4)->default(0);
             $table->text('keterangan')->nullable();
             $table->timestamps();
         });
