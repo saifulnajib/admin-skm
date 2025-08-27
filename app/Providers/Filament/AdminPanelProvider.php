@@ -38,7 +38,8 @@ class AdminPanelProvider extends PanelProvider
             'danger' => Color::Rose,
             'gray' => Color::Gray,
             'info' => Color::Blue,
-            'primary' => Color::Green,
+            // 'primary' => Color::GreenColor::Green,
+            'primary' => '#00DCDD',
             'success' => Color::Emerald,
             'warning' => Color::Orange,
             ])
@@ -52,7 +53,7 @@ class AdminPanelProvider extends PanelProvider
         slug: 'my-profile' // Sets the slug for the profile page (default = 'my-profile')
     )
             )
-            ->plugin(FilamentProgressbarPlugin::make()->color('#16a34a'))
+            ->plugin(FilamentProgressbarPlugin::make()->color('#A0F4F3'))
              ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
              ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
