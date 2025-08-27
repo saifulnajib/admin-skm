@@ -23,6 +23,7 @@ Route::get('/', function(){
 Route::get('form/pendidikan-option', [SurveyController::class, 'PendidikanOption']);
 Route::get('form/pekerjaan-option', [SurveyController::class, 'PekerjaanOption']);
 Route::get('form/opd-option', [SurveyController::class, 'OpdOption']);
+Route::get('form/layanan-opd-option', [SurveyController::class, 'layananOption']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
