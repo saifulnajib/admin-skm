@@ -9,6 +9,7 @@ use App\Models\MasterPendidikan;
 use App\Models\MasterPekerjaan;
 use App\Models\MasterOpd;
 use App\Models\LayananOpd;
+use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Api\ApiController;
 // use App\Http\Resources\Base\BaseCollection;
@@ -47,4 +48,10 @@ class SurveyController extends ApiController
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
+    public function siteSetting(Request $request): JsonResponse
+    {
+        $data = SiteSetting::select('*')->first();
+        $data["file_logo"] = env('APP_URL').'/storage/'.$data['logo']; 
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
 }
