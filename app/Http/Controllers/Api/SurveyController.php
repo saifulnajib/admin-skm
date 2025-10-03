@@ -10,6 +10,8 @@ use App\Models\MasterPekerjaan;
 use App\Models\MasterOpd;
 use App\Models\LayananOpd;
 use App\Models\SiteSetting;
+use App\Models\Pertanyaan;
+use App\Models\Survey;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Api\ApiController;
 // use App\Http\Resources\Base\BaseCollection;
@@ -52,6 +54,22 @@ class SurveyController extends ApiController
     {
         $data = SiteSetting::select('*')->first();
         $data["file_logo"] = env('APP_URL').'/storage/'.$data['logo']; 
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+
+    public function getPertanyaan(Request $request): JsonResponse
+    {
+        $id_survey = $request->id_survey;
+        $data['id_survey'] = $request->id_survey;
+        
+        // if($request->has('id_survey')){
+        //     $data = Pertanyaan::select('*')->with(['survey','pilihanJawaban'])->where(['id_survey'=>$id_survey])->orderBy('id_indikator')->get();
+        // }
+        if($request->has('id_survey')){
+            $data = Survey::select('*')->with(['pertanyaan.pilihanJawaban','pertanyaan.indikator'])->where(['id'=>$id_survey])->get();
+        }
+
+
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 }

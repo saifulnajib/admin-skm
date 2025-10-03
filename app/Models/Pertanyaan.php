@@ -21,4 +21,10 @@ class Pertanyaan extends Model
     {
         return $this->hasMany(PilihanJawaban::class, 'id_pertanyaan');
     }
+
+    public function indikator()
+    {
+        return $this->belongsTo(Indikator::class, 'id_indikator');
+    }
+
 }
