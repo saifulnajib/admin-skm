@@ -11,5 +11,5 @@ class MasterOpd extends Model
 
 
     protected $table = 'master_opd';
-    protected $fillable = ['name','is_active'];
+    protected $fillable = ['id','name','is_active'];
 }
