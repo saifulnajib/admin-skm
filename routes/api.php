@@ -24,6 +24,7 @@ Route::get('form/pendidikan-option', [SurveyController::class, 'PendidikanOption
 Route::get('form/pekerjaan-option', [SurveyController::class, 'PekerjaanOption']);
 Route::get('form/opd-option', [SurveyController::class, 'OpdOption']);
 Route::get('form/layanan-opd-option', [SurveyController::class, 'layananOption']);
+Route::get('form/survey-option', [SurveyController::class, 'surveyOption']);
 Route::get('site-setting', [SurveyController::class, 'siteSetting']);
 Route::get('survey/pertanyaan',[SurveyController::class, 'getPertanyaan']);
 

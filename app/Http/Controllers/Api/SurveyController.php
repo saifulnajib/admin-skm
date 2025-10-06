@@ -14,8 +14,7 @@ use App\Models\Pertanyaan;
 use App\Models\Survey;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Api\ApiController;
-// use App\Http\Resources\Base\BaseCollection;
-// use App\Http\Resources\TingkatPendidikanResource;
+use App\Http\Resources\SurveyOptionResource;
 
 class SurveyController extends ApiController
 {
@@ -50,6 +49,20 @@ class SurveyController extends ApiController
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
 
+    public function surveyOption(Request $request): JsonResponse
+    {
+        $id_layanan_opd = $request->id_layanan_opd;
+        $data = [];
+        if($request->has('id_layanan_opd')){
+           $data = Survey::select('*')->with(['getLayananOpd.getOpd'])->where(['is_active'=>'1','id_layanan_opd'=>$id_layanan_opd])->get();
+        }
+         return response()->json([
+            'success' => true,
+            'data' => SurveyOptionResource::collection($data),
+            'message' => 'Data retrieved successfully.'
+        ]);
+    }
+
     public function siteSetting(Request $request): JsonResponse
     {
         $data = SiteSetting::select('*')->first();
@@ -66,7 +79,7 @@ class SurveyController extends ApiController
         //     $data = Pertanyaan::select('*')->with(['survey','pilihanJawaban'])->where(['id_survey'=>$id_survey])->orderBy('id_indikator')->get();
         // }
         if($request->has('id_survey')){
-            $data = Survey::select('*')->with(['pertanyaan.pilihanJawaban','pertanyaan.indikator'])->where(['id'=>$id_survey])->get();
+            $data = Survey::select('*')->with(['getLayananOpd.getOpd','pertanyaan.pilihanJawaban','pertanyaan.indikator'])->where(['id'=>$id_survey])->get();
         }
 
 
