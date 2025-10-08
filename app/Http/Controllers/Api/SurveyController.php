@@ -12,9 +12,12 @@ use App\Models\LayananOpd;
 use App\Models\SiteSetting;
 use App\Models\Pertanyaan;
 use App\Models\Survey;
+use App\Models\Responden;
+use App\Models\JawabanSurvey;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Resources\SurveyOptionResource;
+use Illuminate\Support\Facades\DB;
 
 class SurveyController extends ApiController
 {
@@ -84,5 +87,64 @@ class SurveyController extends ApiController
 
 
         return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+
+    public function jawabanSurvey(Request $request): JsonResponse
+    {
+        $input = $request->all();
+
+        $messages = [
+                        'gender.in' => 'Gender hanya boleh diisi dengan laki-laki atau perempuan.',
+                    ];
+
+        $validator = Validator::make($input, [
+            'id_survey' => 'required',
+            'id_pendidikan' => 'required',
+            'id_pendidikan' => 'required',
+            'umur' => 'required|numeric',
+            'gender' => 'required|in:laki-laki,perempuan',
+            'jawaban' => 'required|array|min:1',
+            'jawaban.*.id_pilihan_jawaban' => 'required|integer|exists:pilihan_jawaban,id',
+        ], $messages);
+
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors(), 422);
+        }
+
+        $data["id_survey"] = $request->id_survey;
+        $data["id_pendidikan"] = $request->id_pendidikan;
+        $data["id_pekerjaan"] = $request->id_pekerjaan;
+        $data["name"] = $request->name;
+        $data["umur"] = $request->umur;
+        $data["gender"] = $request->gender;
+        $data["keterangan"] = $request->keterangan;
+
+        DB::beginTransaction();
+        try{
+            $dataResponden = Responden::create($data);
+            $id_responden = $dataResponden->id;
+
+
+            $insertJawaban = [];
+            foreach ($input['jawaban'] as $jawaban) {
+                    $insertJawaban[] = [
+                        'id_survey'=>$data["id_survey"],
+                        'id_responden'=>$id_responden,
+                        'id_pilihan_jawaban' => $jawaban['id_pilihan_jawaban'],
+                    ];
+                }
+            JawabanSurvey::insert($insertJawaban);
+                
+            DB::commit();
+
+        return $this->sendResponse($dataResponden, 'Data retrieve succesfully.');
+        } catch (\Exception $e){
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan jawaban: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

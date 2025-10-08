@@ -27,6 +27,7 @@ Route::get('form/layanan-opd-option', [SurveyController::class, 'layananOption']
 Route::get('form/survey-option', [SurveyController::class, 'surveyOption']);
 Route::get('site-setting', [SurveyController::class, 'siteSetting']);
 Route::get('survey/pertanyaan',[SurveyController::class, 'getPertanyaan']);
+Route::post('survey/kirim-jawaban',[SurveyController::class, 'jawabanSurvey']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

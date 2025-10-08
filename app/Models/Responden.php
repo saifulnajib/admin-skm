@@ -10,10 +10,10 @@ class Responden extends Model
     use HasFactory;
 
     protected $table = 'respondens';
-    protected $fillable = ['name','id_layanan_opd','id_pendidikan','id_pekerjaan','umur','gender','is_active','keterangan'];
+    protected $fillable = ['name','id_survey','id_pendidikan','id_pekerjaan','umur','gender','nilai','is_active','keterangan'];
 
-    public function getLayananOpd(){
-        return $this->belongsTo(LayananOpd::class, 'id_layanan_opd');
+    public function getSurvey(){
+        return $this->belongsTo(Survey::class, 'id_survey');
     }
 
     public function getPendidikan(){
