@@ -10,7 +10,7 @@ class SiteSetting extends Model
     use HasFactory;
 
     protected $table = 'site_settings';
-    protected $fillable = ['name','nama_aplikasi','deskripso',
+    protected $fillable = ['name','nama_aplikasi','deskripsi',
                             'tentang','deskripsi_unsur','logo',
                             'telp','email','copyright'];
 }
