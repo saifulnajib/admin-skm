@@ -1,0 +1,7 @@
+button svg {
+    cursor: pointer;
+    transition: transform 0.1s ease-in-out;
+}
+button:hover svg {
+    transform: scale(1.1);
+}

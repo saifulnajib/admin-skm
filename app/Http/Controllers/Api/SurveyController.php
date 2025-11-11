@@ -14,6 +14,7 @@ use App\Models\Pertanyaan;
 use App\Models\Survey;
 use App\Models\Responden;
 use App\Models\JawabanSurvey;
+use App\Models\Indikator;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Resources\SurveyOptionResource;
@@ -147,4 +148,12 @@ class SurveyController extends ApiController
             ], 500);
         }
     }
+
+    public function indikatorOption(Request $request): JsonResponse
+    {
+        $data = Indikator::select('*')->where(['is_active'=>'1'])->get();
+
+        return $this->sendResponse($data, 'Data retrieved successfully.');
+    }
+
 }
