@@ -15,6 +15,7 @@ use App\Models\Survey;
 use App\Models\Responden;
 use App\Models\JawabanSurvey;
 use App\Models\Indikator;
+use App\Models\PilihanJawaban;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Resources\SurveyOptionResource;
@@ -122,9 +123,40 @@ class SurveyController extends ApiController
 
         DB::beginTransaction();
         try{
+
+            $ids = collect($request->jawaban)->pluck('id_pilihan_jawaban');
+            $jawaban = PilihanJawaban::with('pertanyaan:id,id_indikator')->whereIn('id', $ids)->get(['id', 'bobot', 'id_pertanyaan']);
+
+            if($jawaban->isEmpty()){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada jawaban yang valid ditemukan.',
+                ], 400);
+            }
+
+            $kelompokIndikator = $jawaban->groupBy(fn ($row)=> $row->pertanyaan->id_indikator);
+
+            $hasilIndikator = [];
+            $totalRata = 0;
+
+            foreach($kelompokIndikator as $id_indikator => $rows){
+                $rata = $rows->avg('bobot');
+                $hasilIndikator[] = [
+                    'id_indikator' => $id_indikator,
+                    'jumlah_pertanyaan' => $rows->count(),
+                    'rata_rata' => round($rata, 3)
+                ];
+
+                $totalRata += $rata;
+            }
+
+            $jumlahIndikator = count($hasilIndikator);
+            $ikm = ($totalRata / $jumlahIndikator) * 25;
+            $avgSkor = $totalRata / $jumlahIndikator;
+            $data["nilai"] = round($ikm,4);
+
             $dataResponden = Responden::create($data);
             $id_responden = $dataResponden->id;
-
 
             $insertJawaban = [];
             foreach ($input['jawaban'] as $jawaban) {
@@ -135,7 +167,9 @@ class SurveyController extends ApiController
                     ];
                 }
             JawabanSurvey::insert($insertJawaban);
-                
+            //return  $this->sendResponse($dataResponden, 'Data retrieve succesfully.');
+            $hitungIkm = $this->hitungIkm($data["id_survey"],$data["nilai"]);
+
             DB::commit();
 
         return $this->sendResponse($dataResponden, 'Data retrieve succesfully.');
@@ -155,5 +189,30 @@ class SurveyController extends ApiController
 
         return $this->sendResponse($data, 'Data retrieved successfully.');
     }
+
+    public function hitungIkm($id_survey, $ikm)
+    {
+        
+        $survey = Survey::find($id_survey);
+
+        if (!$survey) {
+            return false; 
+        }
+
+        $totalResponden = Responden::where('id_survey', $id_survey)->count();
+
+        if ($totalResponden > 1) {
+            $nilaiBaru = (($survey->nilai * ($totalResponden - 1)) + $ikm) / $totalResponden;
+        } else {
+            $nilaiBaru = $ikm;
+        }
+        
+        $survey->update([
+            'nilai' => round($nilaiBaru, 2)
+        ]);
+
+        return true;
+    }
+
 
 }
