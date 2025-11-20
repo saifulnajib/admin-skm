@@ -16,6 +16,12 @@ class JawabanSurvey extends Model
         return $this->hasOne(PilihanJawaban::class, 'id_pilihan_jawaban');
     }
 
+    public function pilihanJawaban()
+    {
+        return $this->belongsTo(PilihanJawaban::class, 'id_pilihan_jawaban');
+    }
+    
+
     public function responden(){
         return $this->belongsTo(Responden::class, 'id_responden');
     }
