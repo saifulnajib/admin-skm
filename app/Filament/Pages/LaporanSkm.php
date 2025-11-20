@@ -123,8 +123,8 @@ class LaporanSkm extends Page implements Forms\Contracts\HasForms
         // =========================
 
         $genderMap = [
-            'L' => 'Laki-laki',
-            'P' => 'Perempuan',
+            'laki-laki' => 'Laki-laki',
+            'perempuan' => 'Perempuan',
         ];
 
         foreach ($genderMap as $value => $label) {
