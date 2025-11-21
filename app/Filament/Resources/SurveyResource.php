@@ -29,7 +29,7 @@ class SurveyResource extends Resource
     protected static ?string $navigationLabel = 'Survey';
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationGroup = 'Survey';
-    protected static ?int $navigationSort = 1; // <-- untuk urutan
+    protected static ?int $navigationSort = 2; // <-- untuk urutan
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
@@ -108,7 +108,10 @@ class SurveyResource extends Resource
                 TextColumn::make('index')->label('#')->rowIndex(),
                 TextColumn::make('name')->label('Survey')->searchable()->sortable(),
                 TextColumn::make('nilai')->label('IKM')->sortable(),
-               // TextColumn::make('getOpd.name')->label('OPD')->searchable()->sortable(),
+               TextColumn::make('getLayananOpd.getOpd.name')->label('OPD')->searchable()->sortable(),
+               TextColumn::make('getLayananOpd.name')->label('Layanan')->searchable()->sortable(),
+               TextColumn::make('start_date')->label('Mulai')->date(),
+               TextColumn::make('end_date')->label('Sampai')->date(),
                 TextColumn::make('is_active')->label('Status')->searchable()->sortable()->badge()
                 ->color(fn (string $state): string => match ($state) {
                         '1' => 'success',

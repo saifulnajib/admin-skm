@@ -23,4 +23,9 @@ class Responden extends Model
     public function getPekerjaan(){
         return $this->belongsTo(MasterPekerjaan::class, 'id_pekerjaan');
     }
+
+    public function jawabanSurveys()
+    {
+        return $this->hasMany(JawabanSurvey::class, 'id_responden');
+    }
 }

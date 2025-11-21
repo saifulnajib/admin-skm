@@ -20,6 +20,8 @@ class LaporanSkm extends Page implements Forms\Contracts\HasForms
 
     protected static ?string $navigationIcon  = 'heroicon-o-chart-bar';
     protected static ?string $navigationLabel = 'Laporan SKM';
+    protected static ?string $navigationGroup = 'Survey';
+    protected static ?int $navigationSort = 4; // <-- untuk urutan
     protected static ?string $title           = 'Laporan SKM';
     protected static string  $view            = 'filament.pages.laporan-skm';
 
