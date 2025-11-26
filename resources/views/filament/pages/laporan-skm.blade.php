@@ -104,7 +104,7 @@
             </thead>
 
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
-                
+
                 {{-- Baris: Total Nilai IKM per Unsur --}}
                 <tr class="fi-ta-row">
                     <td class="fi-ta-cell px-4 py-2 font-medium">
@@ -154,6 +154,11 @@
                             {{ number_format($row['nilai_ikm'], 2, ',', '.') }}
                         </td>
                     @endforeach
+                </tr>
+                <tr class="fi-ta-row fi-ta-row--highlight">
+                    <td class="fi-ta-cell px-4 py-4 text-center text-gray-500" colspan="10">
+                      <h2 class="text-base font-semibold mb-3">  Total Nilai IKM Keseluruhan: <strong>{{ number_format($this->totalNilaiIKM, 2, ',', '.') }}</strong></h2>
+                    </td>
                 </tr>
 
                 @if (! count($this->unsurRows))

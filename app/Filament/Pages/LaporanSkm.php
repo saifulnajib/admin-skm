@@ -21,7 +21,7 @@ class LaporanSkm extends Page implements Forms\Contracts\HasForms
     protected static ?string $navigationIcon  = 'heroicon-o-chart-bar';
     protected static ?string $navigationLabel = 'Laporan SKM';
     protected static ?string $navigationGroup = 'Survey';
-    protected static ?int $navigationSort = 4; // <-- untuk urutan
+    protected static ?int $navigationSort     = 4; // <-- untuk urutan
     protected static ?string $title           = 'Laporan SKM';
     protected static string  $view            = 'filament.pages.laporan-skm';
 
@@ -31,6 +31,7 @@ class LaporanSkm extends Page implements Forms\Contracts\HasForms
     public array $rows = [];
     public array $unsurRows = [];
     public int $totalResponden = 0;
+    public float $totalNilaiIKM = 0;
 
     public function mount(): void
     {
@@ -75,7 +76,7 @@ class LaporanSkm extends Page implements Forms\Contracts\HasForms
                     ->live()
                     ->afterStateUpdated(function ($state) {
                         $this->id_layanan_opd = $state;
-                        $this->loadData(); // <-- penting: panggil lagi
+                        $this->loadData(); 
                     }),
             ])
             ->columns(2);
@@ -117,6 +118,7 @@ class LaporanSkm extends Page implements Forms\Contracts\HasForms
         if ($this->totalResponden === 0) {
             $this->rows = [];
             $this->unsurRows = [];
+            $this->totalNilaiIKM = 0;
             return;
         }
 
@@ -222,59 +224,78 @@ class LaporanSkm extends Page implements Forms\Contracts\HasForms
     }
 
     protected function buildUnsurRows($baseRespondenQuery): array
-    {
-        // Ambil ID responden yang sudah terfilter (OPD, Layanan, dst.)
-        $respondenIds = (clone $baseRespondenQuery)->pluck('id');
+{
+    // Ambil ID responden yang sudah terfilter (OPD, Layanan, dst.)
+    $respondenIds = (clone $baseRespondenQuery)->pluck('id');
 
-        if ($respondenIds->isEmpty()) {
-            return [];
-        }
-
-        $rows = [];
-
-        // Ambil semua indikator aktif, urut berdasar id
-        $indikators = Indikator::query()
-            ->where('is_active', 1)
-            ->orderBy('id')
-            ->get();
-
-        $i = 1; // U1, U2, dst.
-
-        foreach ($indikators as $indikator) {
-            $data = JawabanSurvey::query()
-                ->whereIn('jawaban_survey.id_responden', $respondenIds)
-                // pertanyaan yang indikatornya = indikator ini
-                ->whereHas('pilihanJawaban.pertanyaan', function ($q) use ($indikator) {
-                    $q->where('id_indikator', $indikator->id);
-                })
-                // nilai diambil dari pilihan_jawaban.bobot
-                ->join('pilihan_jawaban', 'pilihan_jawaban.id', '=', 'jawaban_survey.id_pilihan_jawaban')
-                ->selectRaw('COUNT(*) as jumlah, AVG(pilihan_jawaban.bobot) as rata_bobot')
-                ->first();
-
-            if (! $data || $data->jumlah == 0) {
-                $i++;
-                continue;
-            }
-
-            $rata     = (float) $data->rata_bobot;
-            $ikmUnsur = round($rata * 25, 2);
-            $totalperUnsur = $rata * $data->jumlah;;
-
-            $rows[] = [
-                'kode'       => 'U' . $i,
-                'unsur'      => 'U' . $i . ' - ' . $indikator->name,
-                'jumlah'     => (int) $data->jumlah,
-                'rata_nilai' => round($rata, 3),
-                'nilai_ikm'  => $ikmUnsur,
-                'totalperUnsur'  => $totalperUnsur,
-            ];
-
-            $i++;
-        }
-
-        return $rows;
+    if ($respondenIds->isEmpty()) {
+        $this->totalNilaiIKM = 0;
+        return [];
     }
+
+    $rows = [];
+
+    // Ambil semua indikator aktif, urut berdasar id
+    $indikators = Indikator::query()
+        ->where('is_active', 1)
+        ->orderBy('id')
+        ->get();
+
+    $i = 1; // U1, U2, dst.
+
+    // akumulator untuk IKM total
+    $totalBobotSemuaUnsur = 0; // Σ (rata × jumlah)
+    $totalJawabanSemuaUnsur = 0; // Σ jumlah
+
+    foreach ($indikators as $indikator) {
+        $data = JawabanSurvey::query()
+            ->whereIn('jawaban_survey.id_responden', $respondenIds)
+            // pertanyaan yang indikatornya = indikator ini
+            ->whereHas('pilihanJawaban.pertanyaan', function ($q) use ($indikator) {
+                $q->where('id_indikator', $indikator->id);
+            })
+            // nilai diambil dari pilihan_jawaban.bobot
+            ->join('pilihan_jawaban', 'pilihan_jawaban.id', '=', 'jawaban_survey.id_pilihan_jawaban')
+            ->selectRaw('COUNT(*) as jumlah, AVG(pilihan_jawaban.bobot) as rata_bobot')
+            ->first();
+
+        if (! $data || $data->jumlah == 0) {
+            $i++;
+            continue;
+        }
+
+        $rata        = (float) $data->rata_bobot;
+        $jumlah      = (int) $data->jumlah;
+        $ikmUnsur    = round($rata * 25, 2);
+        $totalperUnsur = $rata * $jumlah;
+
+        // akumulasi untuk IKM total
+        $totalBobotSemuaUnsur   += $totalperUnsur;
+        $totalJawabanSemuaUnsur += $jumlah;
+
+        $rows[] = [
+            'kode'          => 'U' . $i,
+            'unsur'         => 'U' . $i . ' - ' . $indikator->name,
+            'jumlah'        => $jumlah,
+            'rata_nilai'    => round($rata, 3),
+            'nilai_ikm'     => $ikmUnsur,
+            'totalperUnsur' => $totalperUnsur,
+        ];
+
+        $i++;
+    }
+
+    // hitung IKM total
+    if ($totalJawabanSemuaUnsur > 0) {
+        $rataSemuaUnsur      = $totalBobotSemuaUnsur / $totalJawabanSemuaUnsur;
+        $this->totalNilaiIKM = round($rataSemuaUnsur * 25, 2);
+    } else {
+        $this->totalNilaiIKM = 0;
+    }
+
+    return $rows;
+}
+
 
     protected function persen(int|float $jumlah, int $total): float
     {
